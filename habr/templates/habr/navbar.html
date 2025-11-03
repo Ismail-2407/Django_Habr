@@ -1,0 +1,109 @@
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="{% url 'habr:article_list' %}">
+      <i class="bi bi-newspaper"></i> Хабр
+    </a>
+
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'habr:article_list' %}">All Articles</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'habr:popular_articles' %}">Popular</a>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            role="button"
+            data-bs-toggle="dropdown"
+          >
+            Categories
+          </a>
+          <ul class="dropdown-menu dropdown-menu-dark">
+            {% for category in categories %}
+            <li>
+              <a
+                class="dropdown-item"
+                href="{% url 'habr:category_articles' category.slug %}"
+              >
+                {{ category.name }}
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'habr:authors' %}">Authors</a>
+        </li>
+
+        {% if request.user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'habr:favorites' %}">Favorites</a>
+        </li>
+        {% endif %}
+      </ul>
+
+      <ul class="navbar-nav">
+        {% if request.user.is_authenticated %}
+          {% with profile=request.user.profile %}
+            {% if profile.is_admin %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'habr:admin_panel' %}">
+                  <i class="bi bi-shield-check"></i> Admin Panel
+                </a>
+              </li>
+            {% endif %}
+
+            {% if profile.is_super_admin %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'habr:manage_users' %}">
+                  <i class="bi bi-people"></i> Manage Users
+                </a>
+              </li>
+            {% endif %}
+          {% endwith %}
+
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'habr:article_create' %}">
+              <i class="bi bi-plus-circle"></i> New Article
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'habr:profile' %}">
+              <i class="bi bi-person-circle"></i> Profile
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'habr:logout' %}">
+              <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'habr:login' %}">
+              <i class="bi bi-box-arrow-in-right"></i> Login
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-accent ms-2" href="{% url 'habr:register' %}">
+              Register
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>

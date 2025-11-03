@@ -1,0 +1,55 @@
+{% extends 'habr/base.html' %}
+
+{% block title %}Login - Habr-like News{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-5 col-lg-4">
+      <div class="card bg-dark border-0 shadow-lg">
+        <div class="card-body p-4">
+          <div class="text-center mb-4">
+            <i class="bi bi-person-circle text-accent" style="font-size: 64px"></i>
+            <h3 class="text-white mt-2">Login</h3>
+            <p class="text-white-50">Access your account to publish and interact</p>
+          </div>
+
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+
+          <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="username" class="form-label text-white">Username</label>
+              <input type="text" class="form-control bg-dark text-white border-secondary"
+                     id="username" name="username" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="password" class="form-label text-white">Password</label>
+              <input type="password" class="form-control bg-dark text-white border-secondary"
+                     id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn btn-accent w-100 mt-3">
+              <i class="bi bi-box-arrow-in-right"></i> Login
+            </button>
+          </form>
+
+          <div class="text-center mt-3">
+            <p class="text-white-50 mb-0">
+              Don’t have an account?
+              <a href="{% url 'habr:register' %}" class="text-accent text-decoration-none">
+                Register
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

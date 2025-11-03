@@ -1,0 +1,182 @@
+{% extends 'habr/base.html' %} {% load humanize %} {% block title %}Profile - {{
+user.username }}{% endblock %} {% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-md-4 mb-4">
+      <div class="card card-dark">
+        <div class="card-body text-center">
+          <i
+            class="bi bi-person-circle"
+            style="font-size: 80px; color: var(--accent)"
+          ></i>
+          <h3 class="text-white mt-3">{{ user.username }}</h3>
+          <p class="text-white-50">{{ user.email }}</p>
+          {% if profile %}
+          <div class="mb-3">
+            {% if profile.role == 'SUPER_ADMIN' %}
+            <span class="badge bg-warning">Super Admin</span>
+            {% elif profile.role == 'ADMIN' %}
+            <span class="badge bg-success">Admin</span>
+            {% else %}
+            <span class="badge bg-secondary">User</span>
+            {% endif %} {% if profile.is_banned %}
+            <span class="badge bg-danger">Banned</span>
+            {% endif %}
+          </div>
+          {% endif %}
+          <p class="text-white-50 small">
+            Member since {{ user.date_joined|date:"M Y" }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link active"
+            data-bs-toggle="tab"
+            data-bs-target="#articles"
+          >
+            My Articles ({{ user_articles|length }})
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            data-bs-toggle="tab"
+            data-bs-target="#bookmarks"
+          >
+            Bookmarks ({{ bookmarks|length }})
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#liked">
+            Liked ({{ liked_articles|length }})
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content">
+        <div class="tab-pane fade show active" id="articles">
+          {% if user_articles %}
+          <div class="row g-3">
+            {% for article in user_articles %}
+            <div class="col-12">
+              <div class="card card-dark">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                      <h5 class="card-title text-white">
+                        <a
+                          href="{% url 'habr:article_detail' article.pk %}"
+                          class="text-white text-decoration-none"
+                        >
+                          {{ article.title }}
+                        </a>
+                      </h5>
+                      <p class="text-white-50 small mb-2">
+                        <span class="badge bg-primary"
+                          >{{ article.category.name }}</span
+                        >
+                        {% if article.is_approved and article.is_published %}
+                        <span class="badge bg-success">Published</span>
+                        {% elif article.is_approved %}
+                        <span class="badge bg-warning">Approved</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Pending</span>
+                        {% endif %}
+                        <span class="ms-2"
+                          >{{ article.created_at|naturaltime }}</span
+                        >
+                      </p>
+                    </div>
+                    <div class="ms-3">
+                      <a
+                        href="{% url 'habr:article_update' article.pk %}"
+                        class="btn btn-sm btn-outline-primary"
+                      >
+                        <i class="bi bi-pencil"></i>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="tab-pane fade" id="bookmarks">
+          {% if bookmarks %}
+          <div class="row g-3">
+            {% for bookmark in bookmarks %}
+            <div class="col-12">
+              <div class="card card-dark">
+                <div class="card-body">
+                  <h5 class="card-title text-white">
+                    <a
+                      href="{% url 'habr:article_detail' bookmark.article.pk %}"
+                      class="text-white text-decoration-none"
+                    >
+                      {{ bookmark.article.title }}
+                    </a>
+                  </h5>
+                  <p class="text-white-50 small">
+                    <i class="bi bi-person"></i> {{
+                    bookmark.article.author.username }} •
+                    <i class="bi bi-clock"></i> {{
+                    bookmark.article.created_at|naturaltime }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="empty-state">
+            <i class="bi bi-bookmark"></i>
+            <p>No bookmarked articles yet.</p>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="tab-pane fade" id="liked">
+          {% if liked_articles %}
+          <div class="row g-3">
+            {% for article in liked_articles %}
+            <div class="col-12">
+              <div class="card card-dark">
+                <div class="card-body">
+                  <h5 class="card-title text-white">
+                    <a
+                      href="{% url 'habr:article_detail' article.pk %}"
+                      class="text-white text-decoration-none"
+                    >
+                      {{ article.title }}
+                    </a>
+                  </h5>
+                  <p class="text-white-50 small">
+                    <i class="bi bi-person"></i> {{ article.author.username }} •
+                    <i class="bi bi-clock"></i> {{
+                    article.created_at|naturaltime }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="empty-state">
+            <i class="bi bi-hand-thumbs-up"></i>
+            <p>No liked articles yet.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

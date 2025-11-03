@@ -1,137 +1,247 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>{{ article.title }}</title>
-    <style>
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Arial,
-          sans-serif;
-        background: #0e0f12;
-        color: #e6e6e6;
-      }
-      .container {
-        max-width: 980px;
-        margin: 0 auto;
-        padding: 24px 16px;
-      }
-      .back {
-        color: #4aa3ff;
-        text-decoration: none;
-      }
-      .card {
-        background: #121418;
-        border: 1px solid #2a2d34;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
-      }
-      .hero {
-        width: 100%;
-        height: 420px;
-        object-fit: cover;
-        background: #1b1e24;
-        display: block;
-      }
-      .content {
-        padding: 22px;
-      }
-      h1 {
-        margin: 0 0 8px;
-        font-size: 30px;
-        line-height: 1.2;
-        color: #e8f0ff;
-      }
-      .meta {
-        color: #8b8f98;
-        font-size: 14px;
-        margin: 4px 0 16px;
-      }
-      .article-text {
-        white-space: pre-wrap;
-        font-size: 16px;
-        line-height: 1.7;
-        color: #d7dbe3;
-      }
-      .actions {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        margin-top: 16px;
-      }
-      .actions form {
-        display: inline;
-      }
-      .btn {
-        padding: 8px 12px;
-        border: 1px solid #2a2d34;
-        background: #17191e;
-        color: #e6e6e6;
-        cursor: pointer;
-        border-radius: 8px;
-      }
-      .btn:hover {
-        background: #1f232a;
-      }
-      .muted {
-        color: #9aa0a8;
-      }
-    </style>
-    {% load humanize %}
-  </head>
-  <body>
-    <div class="container">
-      <p>
-        <a class="back" href="{% url 'habr:article_list' %}">← Back to list</a>
-      </p>
-      <div class="card">
-        {% if article.image_url %}
-        <img
-          class="hero"
-          src="{{ article.image_url }}"
-          alt="{{ article.title }}"
-        />
+{% extends 'habr/base.html' %}
+{% load humanize %}
+
+{% block title %}{{ article.title }} - Habr-like News{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row mb-3">
+    <div class="col">
+      <a href="{% url 'habr:article_list' %}" class="text-accent text-decoration-none">
+        <i class="bi bi-arrow-left"></i> Back to Articles
+      </a>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <article class="card card-dark mb-4">
+        {% if article.image_display_url %}
+          <img src="{{ article.image_display_url }}" class="card-img-top"
+               style="height: 400px; object-fit: cover" alt="{{ article.title }}">
         {% else %}
-        <img
-          class="hero"
-          src="https://res.cloudinary.com/demo/image/upload/w_1200,h_380,c_fill/sample.jpg"
-          alt="placeholder"
-        />
+          <div class="bg-secondary d-flex align-items-center justify-content-center"
+               style="height: 400px">
+            <i class="bi bi-image text-white" style="font-size: 64px; opacity: 0.5"></i>
+          </div>
         {% endif %}
-        <div class="content">
-          <h1>{{ article.title }}</h1>
-          <div class="meta">
-            By {{ article.author.username }} • {{ article.category.name }} • {{
-            article.created_at|naturaltime }}
+
+        <div class="card-body">
+          <div class="mb-3">
+            <span class="badge bg-primary">{{ article.category.name }}</span>
+            <span class="badge bg-success">
+              <i class="bi bi-star-fill"></i> {{ article.rating|default:"0.0" }} / 5.0
+            </span>
           </div>
-          <div class="article-text">{{ article.content }}</div>
-          <div class="actions">
-            <form
-              method="post"
-              action="{% url 'habr:toggle_like' article.pk %}"
-            >
-              {% csrf_token %}
-              <button class="btn" type="submit">
-                👍 Like ({{ article.likes_count }})
-              </button>
-            </form>
-            <form
-              method="post"
-              action="{% url 'habr:toggle_dislike' article.pk %}"
-            >
-              {% csrf_token %}
-              <button class="btn" type="submit">
-                👎 Dislike ({{ article.dislikes_count }})
-              </button>
-            </form>
+
+          <h1 class="text-white mb-3">{{ article.title }}</h1>
+
+          <div class="text-white-50 mb-4">
+            <i class="bi bi-person"></i> By
+            <strong class="text-white">{{ article.author.username }}</strong> •
+            <i class="bi bi-clock"></i> {{ article.created_at|naturaltime }}
           </div>
-          {% if not request.user.is_authenticated %}
-          <p class="muted" style="margin-top: 8px">
-            Login to vote or create articles.
-          </p>
+
+          <div class="article-content text-white"
+               style="white-space: pre-wrap; line-height: 1.8; font-size: 16px">
+            {{ article.content }}
+          </div>
+
+          <hr class="border-secondary my-4">
+
+          <!-- 👍 LIKE / 👎 DISLIKE / 🔖 BOOKMARK -->
+          <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+            {% if request.user.is_authenticated %}
+              <form method="post" action="{% url 'habr:toggle_like' article.pk %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit"
+                        class="btn btn-dark border-0 d-flex align-items-center gap-1 like-btn">
+                  <i class="bi bi-hand-thumbs-up text-success"></i>
+                  <span class="text-white">{{ article.likes_count|default:0 }}</span>
+                </button>
+              </form>
+
+              <form method="post" action="{% url 'habr:toggle_dislike' article.pk %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit"
+                        class="btn btn-dark border-0 d-flex align-items-center gap-1 dislike-btn">
+                  <i class="bi bi-hand-thumbs-down text-danger"></i>
+                  <span class="text-white">{{ article.dislikes_count|default:0 }}</span>
+                </button>
+              </form>
+
+              <form method="post" action="{% url 'habr:toggle_bookmark' article.pk %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-warning">
+                  <i class="bi bi-bookmark{% if is_bookmarked %}-fill{% endif %}"></i>
+                  {% if is_bookmarked %}Saved{% else %}Bookmark{% endif %}
+                </button>
+              </form>
+            {% endif %}
+          </div>
+
+          <style>
+            .like-btn:hover i {
+              color: #00ff66 !important;
+              transform: scale(1.3);
+            }
+            .dislike-btn:hover i {
+              color: #ff3b3b !important;
+              transform: scale(1.3);
+            }
+            .like-btn i, .dislike-btn i {
+              transition: all 0.25s ease;
+            }
+          </style>
+
+          {% if request.user.is_authenticated %}
+            <div class="mb-3">
+              <form method="post" action="{% url 'habr:rate_article' article.pk %}"
+                    class="d-flex align-items-center gap-2">
+                {% csrf_token %}
+                <span class="text-white-50">Rate:</span>
+                {% for i in "12345" %}
+                  <button type="submit" name="score" value="{{ i }}"
+                          class="btn btn-sm btn-outline-warning border-0 p-1"
+                          style="font-size: 20px">
+                    {% if user_rating and user_rating >= i|add:"0" %} ⭐ {% else %} ☆ {% endif %}
+                  </button>
+                {% endfor %}
+              </form>
+            </div>
+
+            {% with profile=request.user.profile %}
+              {% if profile.is_admin %}
+                <div class="alert alert-warning">
+                  <strong>Admin Actions:</strong>
+                  {% if not article.is_approved %}
+                    <form method="post" action="{% url 'habr:approve_article' article.pk %}"
+                          class="d-inline ms-2">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-success btn-sm">✅ Approve</button>
+                    </form>
+                  {% endif %}
+                  <form method="post" action="{% url 'habr:reject_article' article.pk %}"
+                        class="d-inline ms-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">❌ Reject</button>
+                  </form>
+                </div>
+              {% endif %}
+
+              {% if article.author == request.user or profile.is_admin %}
+                <div class="mt-3">
+                  <a href="{% url 'habr:article_update' article.pk %}" class="btn btn-primary">
+                    <i class="bi bi-pencil"></i> Edit
+                  </a>
+                  <a href="{% url 'habr:article_delete' article.pk %}" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Delete
+                  </a>
+                </div>
+              {% endif %}
+            {% endwith %}
+          {% else %}
+            <div class="alert alert-info">
+              <a href="{% url 'habr:login' %}">Login</a> to vote, rate, bookmark, or create articles.
+            </div>
           {% endif %}
+        </div>
+      </article>
+
+      <!-- 💬 COMMENTS SECTION -->
+      <div class="card card-dark">
+        <div class="card-body">
+          <h3 class="text-white mb-4">
+            <i class="bi bi-chat-dots"></i> Comments ({{ comments|length }})
+          </h3>
+
+          {% if request.user.is_authenticated %}
+            <form method="post" action="{% url 'habr:add_comment' article.pk %}" class="mb-4">
+              {% csrf_token %}
+              <div class="mb-3">
+                <textarea name="content"
+                          class="form-control bg-dark text-white border-secondary"
+                          rows="3"
+                          placeholder="Write a comment..." required></textarea>
+              </div>
+              <button type="submit" class="btn btn-accent">
+                <i class="bi bi-send"></i> Post Comment
+              </button>
+            </form>
+          {% else %}
+            <div class="alert alert-info">
+              <a href="{% url 'habr:login' %}">Login</a> to leave a comment.
+            </div>
+          {% endif %}
+
+          <div class="mt-4">
+            {% for comment in comments %}
+              <div class="card card-dark mb-3">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                      <strong class="text-white">{{ comment.user.username }}</strong>
+                      <span class="text-white-50 small ms-2">
+                        <i class="bi bi-clock"></i> {{ comment.created_at|naturaltime }}
+                      </span>
+                    </div>
+                  </div>
+                  <p class="text-white mb-0" style="white-space: pre-wrap">
+                    {{ comment.content }}
+                  </p>
+                </div>
+              </div>
+            {% empty %}
+              <div class="text-center text-white-50 py-5">
+                <i class="bi bi-chat-dots" style="font-size: 48px; opacity: 0.5"></i>
+                <p class="mt-3 text-white">No comments yet. Be the first to comment!</p>
+              </div>
+            {% endfor %}
+          </div>
         </div>
       </div>
     </div>
-  </body>
-</html>
+
+    <!-- ℹ️ ARTICLE INFO SIDEBAR -->
+    <div class="col-lg-4">
+      <div class="card card-dark">
+        <div class="card-body">
+          <h5 class="text-white mb-3">Article Info</h5>
+          <ul class="list-unstyled">
+            <li class="mb-2">
+              <i class="bi bi-person text-white-50"></i>
+              <strong class="text-white">Author:</strong>
+              <span class="text-white">{{ article.author.username }}</span>
+            </li>
+            <li class="mb-2">
+              <i class="bi bi-folder text-white-50"></i>
+              <strong class="text-white">Category:</strong>
+              <span class="text-white">{{ article.category.name }}</span>
+            </li>
+            <li class="mb-2">
+              <i class="bi bi-calendar text-white-50"></i>
+              <strong class="text-white">Created:</strong>
+              <span class="text-white">{{ article.created_at|date:"M d, Y" }}</span>
+            </li>
+            <li class="mb-2">
+              <i class="bi bi-star text-white-50"></i>
+              <strong class="text-white">Rating:</strong>
+              <span class="text-white">{{ article.rating|default:"0.0" }} / 5.0</span>
+            </li>
+            <li class="mb-2">
+              <i class="bi bi-hand-thumbs-up text-success"></i>
+              <strong>Likes:</strong>
+              <span class="text-white">{{ article.likes_count|default:0 }}</span>
+            </li>
+            <li class="mb-2">
+              <i class="bi bi-hand-thumbs-down text-danger"></i>
+              <strong>Dislikes:</strong>
+              <span class="text-white">{{ article.dislikes_count|default:0 }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

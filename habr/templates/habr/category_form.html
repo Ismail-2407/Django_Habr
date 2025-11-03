@@ -1,88 +1,65 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>New Category</title>
-    <style>
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Arial,
-          sans-serif;
-        background: #0e0f12;
-        color: #e6e6e6;
-        max-width: none;
-      }
-      .container {
-        max-width: 820px;
-        margin: 0 auto;
-        padding: 24px 16px;
-      }
-      .card {
-        background: #121418;
-        border: 1px solid #2a2d34;
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
-      }
-      a {
-        color: #4aa3ff;
-        text-decoration: none;
-      }
-      h1 {
-        margin: 0 0 16px;
-      }
-      label {
-        display: block;
-        margin-top: 12px;
-        font-weight: 600;
-      }
-      input[type="text"] {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #2a2d34;
-        border-radius: 8px;
-        background: #17191e;
-        color: #e6e6e6;
-      }
-      .help {
-        color: #9aa0a8;
-        font-size: 12px;
-        margin-top: 6px;
-      }
-      .btn {
-        margin-top: 16px;
-        padding: 8px 12px;
-        border: 1px solid #2a2d34;
-        background: #17191e;
-        color: #e6e6e6;
-        border-radius: 8px;
-        cursor: pointer;
-      }
-      .btn:hover {
-        background: #1f232a;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <p>
-        <a href="{% url 'habr:article_create' %}">← Back to create article</a>
-      </p>
-      <div class="card">
-        <h1>Create Category</h1>
-        <form method="post">
-          {% csrf_token %}
-          <label for="id_name">Name</label>
-          {{ form.name }}
+{% extends 'habr/base.html' %} {% block title %}Create Category - Habr-like
+News{% endblock %} {% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card card-dark">
+        <div class="card-body p-4">
+          <h2 class="text-white mb-4">
+            <i class="bi bi-tag"></i> Create Category
+          </h2>
 
-          <label for="id_slug">Slug (auto if empty)</label>
-          {{ form.slug }}
-          <div class="help">
-            If you leave slug empty, it will be generated from the name.
-          </div>
+          <form method="post">
+            {% csrf_token %}
 
-          <button class="btn" type="submit">Save</button>
-        </form>
+            <div class="mb-3">
+              <label
+                for="{{ form.name.id_for_label }}"
+                class="form-label text-white"
+                >Name</label
+              >
+              {{ form.name }} {% if form.name.errors %}
+              <div class="text-danger small">{{ form.name.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label
+                for="{{ form.slug.id_for_label }}"
+                class="form-label text-white"
+                >Slug (auto if empty)</label
+              >
+              {{ form.slug }}
+              <div class="form-text">
+                If you leave slug empty, it will be generated from the name.
+              </div>
+              {% if form.slug.errors %}
+              <div class="text-danger small">{{ form.slug.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-accent">
+                <i class="bi bi-check-circle"></i> Save
+              </button>
+              <a
+                href="{% url 'habr:article_create' %}"
+                class="btn btn-secondary"
+              >
+                <i class="bi bi-arrow-left"></i> Back
+              </a>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-  </body>
-</html>
+  </div>
+</div>
+{% endblock %} {% block extra_css %}
+<style>
+  .form-control:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 0.2rem rgba(67, 165, 255, 0.25);
+  }
+</style>
+{% endblock %}

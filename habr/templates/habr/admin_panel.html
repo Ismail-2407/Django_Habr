@@ -1,0 +1,161 @@
+{% extends 'habr/base.html' %} {% load humanize %} {% block title %}Admin Panel
+- Habr-like News{% endblock %} {% block content %}
+<div class="container">
+  <h1 class="text-white mb-4">
+    <i class="bi bi-shield-check"></i> Admin Panel
+  </h1>
+
+  <div class="card card-dark mb-4">
+    <div class="card-header bg-primary text-white">
+      <h3 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Requests</h3>
+    </div>
+    <div class="card-body">
+      {% if edit_requests %} {% for request in edit_requests %}
+      <div class="card card-dark mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <h5 class="text-white mb-1">
+                <a
+                  href="{% url 'habr:article_detail' request.article.pk %}"
+                  class="text-white text-decoration-none"
+                >
+                  {{ request.article.title }}
+                </a>
+              </h5>
+              <p class="text-white-50 small mb-0">
+                <i class="bi bi-person"></i> Requested by {{
+                request.user.username }} • <i class="bi bi-clock"></i> {{
+                request.created_at|naturaltime }}
+              </p>
+            </div>
+          </div>
+
+          <div class="alert alert-info">
+            <strong>Proposed Changes:</strong>
+            <ul class="mb-0 mt-2">
+              <li><strong>Title:</strong> {{ request.title }}</li>
+              <li><strong>Category:</strong> {{ request.category.name }}</li>
+              {% if request.summary %}
+              <li>
+                <strong>Summary:</strong> {{ request.summary|truncatewords:20 }}
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+
+          <div class="d-flex gap-2">
+            <form
+              method="post"
+              action="{% url 'habr:approve_edit_request' request.pk %}"
+              class="d-inline"
+            >
+              {% csrf_token %}
+              <button type="submit" class="btn btn-success">
+                <i class="bi bi-check-circle"></i> Approve
+              </button>
+            </form>
+            <form
+              method="post"
+              action="{% url 'habr:reject_edit_request' request.pk %}"
+              class="d-inline flex-grow-1"
+            >
+              {% csrf_token %}
+              <div class="input-group">
+                <input
+                  type="text"
+                  name="rejection_reason"
+                  class="form-control bg-dark text-white border-secondary"
+                  placeholder="Rejection reason (optional)"
+                />
+                <button type="submit" class="btn btn-danger">
+                  <i class="bi bi-x-circle"></i> Reject
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %} {% else %}
+      <div class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <p class="text-white-50">No pending edit requests</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card card-dark mb-4">
+    <div class="card-header bg-danger text-white">
+      <h3 class="mb-0"><i class="bi bi-trash"></i> Delete Requests</h3>
+    </div>
+    <div class="card-body">
+      {% if delete_requests %} {% for request in delete_requests %}
+      <div class="card card-dark mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <h5 class="text-white mb-1">
+                <a
+                  href="{% url 'habr:article_detail' request.article.pk %}"
+                  class="text-white text-decoration-none"
+                >
+                  {{ request.article.title }}
+                </a>
+              </h5>
+              <p class="text-white-50 small mb-0">
+                <i class="bi bi-person"></i> Requested by {{
+                request.user.username }} • <i class="bi bi-clock"></i> {{
+                request.created_at|naturaltime }}
+              </p>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <form
+              method="post"
+              action="{% url 'habr:approve_delete_request' request.pk %}"
+              class="d-inline"
+            >
+              {% csrf_token %}
+              <button type="submit" class="btn btn-success">
+                <i class="bi bi-check-circle"></i> Approve Delete
+              </button>
+            </form>
+            <form
+              method="post"
+              action="{% url 'habr:reject_delete_request' request.pk %}"
+              class="d-inline flex-grow-1"
+            >
+              {% csrf_token %}
+              <div class="input-group">
+                <input
+                  type="text"
+                  name="rejection_reason"
+                  class="form-control bg-dark text-white border-secondary"
+                  placeholder="Rejection reason (optional)"
+                />
+                <button type="submit" class="btn btn-danger">
+                  <i class="bi bi-x-circle"></i> Reject
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %} {% else %}
+      <div class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <p class="text-white-50">No pending delete requests</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="text-center">
+    <a href="{% url 'habr:article_list' %}" class="btn btn-secondary">
+      <i class="bi bi-arrow-left"></i> Back to Articles
+    </a>
+  </div>
+</div>
+{% endblock %}

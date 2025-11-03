@@ -1,0 +1,88 @@
+{% extends 'habr/base.html' %} {% block title %}Manage Users - Habr-like News{%
+endblock %} {% block content %}
+<div class="container">
+  <h1 class="text-white mb-4"><i class="bi bi-people"></i> Manage Users</h1>
+
+  <div class="card card-dark">
+    <div class="card-body">
+      {% if users %}
+      <div class="table-responsive">
+        <table class="table table-dark table-hover">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr>
+              <td><strong>{{ user.username }}</strong></td>
+              <td>{{ user.email }}</td>
+              <td>
+                {% with profile=user.profile %} {% if profile.role ==
+                'SUPER_ADMIN' %}
+                <span class="badge bg-warning">Super Admin</span>
+                {% elif profile.role == 'ADMIN' %}
+                <span class="badge bg-success">Admin</span>
+                {% else %}
+                <span class="badge bg-secondary">User</span>
+                {% endif %} {% endwith %}
+              </td>
+              <td>
+                {% with profile=user.profile %} {% if profile.is_banned %}
+                <span class="badge bg-danger">Banned</span>
+                {% else %}
+                <span class="badge bg-success">Active</span>
+                {% endif %} {% endwith %}
+              </td>
+              <td>
+                {% with profile=user.profile %} {% if profile.role !=
+                'SUPER_ADMIN' %} {% if profile.role != 'ADMIN' %}
+                <form
+                  method="post"
+                  action="{% url 'habr:assign_admin_role' user.pk %}"
+                  class="d-inline"
+                >
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-success">
+                    <i class="bi bi-shield-check"></i> Assign Admin
+                  </button>
+                </form>
+                {% else %}
+                <form
+                  method="post"
+                  action="{% url 'habr:remove_admin_role' user.pk %}"
+                  class="d-inline"
+                >
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-danger">
+                    <i class="bi bi-shield-x"></i> Remove Admin
+                  </button>
+                </form>
+                {% endif %} {% endif %} {% endwith %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <i class="bi bi-people"></i>
+        <p class="text-white-50">No users found</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="text-center mt-4">
+    <a href="{% url 'habr:article_list' %}" class="btn btn-secondary">
+      <i class="bi bi-arrow-left"></i> Back to Articles
+    </a>
+  </div>
+</div>
+{% endblock %}
